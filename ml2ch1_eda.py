@@ -1,15 +1,15 @@
 ###########################################
 from data_utils import save_fig, fetch_housing_data, load_housing_data
+from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 import matplotlib as mpl
 
-mpl.rc('axes', labelsize=14)
-mpl.rc('xtick', labelsize=12)
-mpl.rc('ytick', labelsize=12)
+mpl.rc('axes', labelsize=24)
+mpl.rc('xtick', labelsize=22)
+mpl.rc('ytick', labelsize=22)
 
 fetch_housing_data()
 housing = load_housing_data()
@@ -49,7 +49,6 @@ plt.show()
 
 #  Geolocation coordinates are unique
 
-from sklearn.model_selection import train_test_split
 train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
 
 # this is purely random sampling. Fine for large enough datasets
@@ -71,10 +70,9 @@ housing["income_cat"].hist()
 plt.show()
 
 
-from sklearn.model_selection import StratifiedShuffleSplit
 
-split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
-for train_index, test_index in split.split(housing, housing["income_cat"]):
+ss_split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
+for train_index, test_index in ss_split.split(housing, housing["income_cat"]):
     strat_train_set = housing.loc[train_index]
     strat_test_set = housing.loc[test_index]
 
@@ -96,6 +94,7 @@ def income_cat_proportions(data):
 train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
 
 #############################################
+
 compare_props = pd.DataFrame(
     {
         "Overall": income_cat_proportions(housing),
@@ -103,15 +102,19 @@ compare_props = pd.DataFrame(
         "Random": income_cat_proportions(test_set),
     }
 ).sort_index()
+
 compare_props["Rand. %error"] = (
     100 * compare_props["Random"] / compare_props["Overall"] - 100
 )
+
 compare_props["Strat. %error"] = (
     100 * compare_props["Stratified"] / compare_props["Overall"] - 100
 )
 
 compare_props
+
 #############################################
+
 for set_ in (strat_train_set, strat_test_set):
     set_.drop("income_cat", axis=1, inplace=True)
 
@@ -124,7 +127,7 @@ housing.plot(kind="scatter", x="longitude", y="latitude")
 save_fig("bad_visualization_plot")
 plt.show()
 
-#
+
 
 housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.1)
 save_fig("better_visualization_plot")
@@ -160,14 +163,15 @@ plt.show()
 # Select only numeric columns
 housing_numerical = housing.select_dtypes(include=['number'])
 corr_matrix = housing_numerical.corr()
-plt.show()
+# corr_matrix.hist()
+# plt.show()
 
 corr_matrix["median_house_value"].sort_values(ascending=False)
 
 
 #
 # from pandas.tools.plotting import scatter_matrix # For older versions of Pandas
-from pandas.plotting import scatter_matrix
+# from pandas.plotting import scatter_matrix
 
 attributes = [
     "median_house_value",
@@ -175,14 +179,15 @@ attributes = [
     "total_rooms",
     "housing_median_age",
 ]
-scatter_matrix(housing[attributes], figsize=(12, 8))
+pd.plotting.scatter_matrix(housing[attributes], figsize=(12, 8))
 save_fig("scatter_matrix_plot")
 plt.show()
 
-#
+
 housing.plot(
     kind="scatter", x="median_income", y="median_house_value", alpha=0.1
 )
+
 plt.axis([0, 16, 0, 550000])
 save_fig("income_vs_house_value_scatterplot")
 plt.show()
@@ -191,9 +196,11 @@ plt.show()
 # experimenting with attribute aombinations
 
 housing["rooms_per_household"] = housing["total_rooms"] / housing["households"]
+
 housing["bedrooms_per_room"] = (
     housing["total_bedrooms"] / housing["total_rooms"]
 )
+
 housing["population_per_household"] = (
     housing["population"] / housing["households"]
 )
