@@ -2,6 +2,13 @@
 from data_utils import save_fig, fetch_housing_data, load_housing_data
 from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 
+# model_selection
+# base.BaseEstimator and base.TransformerMixin
+# impute.SimpleImputer
+# preprocessing.OrdinalEncoder, OneHotEncoder
+# pipeline
+# compose.ColumnTransformer
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -49,6 +56,11 @@ plt.show()
 
 #  Geolocation coordinates are unique
 
+
+
+##################################################################
+##################################################################
+# train_test split
 train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
 
 # this is purely random sampling. Fine for large enough datasets
@@ -70,7 +82,6 @@ housing["income_cat"].hist()
 plt.show()
 
 
-
 ss_split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
 for train_index, test_index in ss_split.split(housing, housing["income_cat"]):
     strat_train_set = housing.loc[train_index]
@@ -90,6 +101,7 @@ housing["income_cat"].value_counts() / len(housing)
 
 def income_cat_proportions(data):
     return data["income_cat"].value_counts() / len(data)
+
 
 train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
 
@@ -113,12 +125,17 @@ compare_props["Strat. %error"] = (
 
 compare_props
 
-#############################################
 
 for set_ in (strat_train_set, strat_test_set):
     set_.drop("income_cat", axis=1, inplace=True)
 
+##################################################################
+##################################################################
+##################################################################
 # Discover and Visualize the data to gain insights
+
+
+##################################################################
 # no validation in this case
 housing = strat_train_set.copy()
 
@@ -126,7 +143,6 @@ housing = strat_train_set.copy()
 housing.plot(kind="scatter", x="longitude", y="latitude")
 save_fig("bad_visualization_plot")
 plt.show()
-
 
 
 housing.plot(kind="scatter", x="longitude", y="latitude", alpha=0.1)
@@ -205,60 +221,84 @@ housing["population_per_household"] = (
     housing["population"] / housing["households"]
 )
 
+housing_numerical = housing.select_dtypes(include=['number'])
+corr_matrix = housing_numerical.corr()
+corr_matrix["median_house_value"].sort_values(ascending=False)
+# from pandas.tools.plotting import (scatter_matrix,)  # For older versions of Pandas
+# from pandas.plotting import scatter_matrix
 
-# corr_matrix = housing.corr()
-# corr_matrix["median_house_value"].sort_values(ascending=False)
-# from pandas.tools.plotting import scatter_matrix # For older versions of Pandas
-from pandas.plotting import scatter_matrix
+attributes = [
+    "median_house_value",
+    "median_income",
+    "total_rooms",
+    "housing_median_age",
+]
 
-attributes = ["median_house_value", "median_income", "total_rooms",
-              "housing_median_age"]
 scatter_matrix(housing[attributes], figsize=(12, 8))
 save_fig("scatter_matrix_plot")
 
 
-housing.plot(kind="scatter", x="median_income", y="median_house_value",
-             alpha=0.1)
+housing.plot(
+    kind="scatter", x="median_income", y="median_house_value", alpha=0.1
+)
 plt.axis([0, 16, 0, 550000])
 save_fig("income_vs_house_value_scatterplot")
 
 
 # Experimenting with Attribute Combinations
-housing["rooms_per_household"] = housing["total_rooms"]/housing["households"]
-housing["bedrooms_per_room"] = housing["total_bedrooms"]/housing["total_rooms"]
-housing["population_per_household"]=housing["population"]/housing["households"]
+housing["rooms_per_household"] = housing["total_rooms"] / housing["households"]
+housing["bedrooms_per_room"] = (
+    housing["total_bedrooms"] / housing["total_rooms"]
+)
+housing["population_per_household"] = (
+    housing["population"] / housing["households"]
+)
 
 
-# corr_matrix = housing.corr()
+housing_numerical = housing.select_dtypes(include=['number'])
 # corr_matrix["median_house_value"].sort_values(ascending=False)
+corr_matrix = housing_numerical.corr()
 
-housing.plot(kind="scatter", x="rooms_per_household", y="median_house_value",
-             alpha=0.2)
+
+housing_numerical.plot(
+    kind="scatter", x="rooms_per_household", y="median_house_value", alpha=0.2
+)
 plt.axis([0, 5, 0, 520000])
 plt.show()
 
 housing.describe()
 
+
+#######################################################################
+#######################################################################
+#######################################################################
 # Prepare the Data for Machine Learning Algorithms
 
-housing = strat_train_set.drop("median_house_value", axis=1) # drop labels for training set
+# drop labels for training set
+housing = strat_train_set.drop("median_house_value", axis=1)
 housing_labels = strat_train_set["median_house_value"].copy()
 
+
+########################################################################
 # Data Cleaning
 
 
 sample_incomplete_rows = housing[housing.isnull().any(axis=1)].head()
 sample_incomplete_rows
 
-sample_incomplete_rows.dropna(subset=["total_bedrooms"])    # option 1
-sample_incomplete_rows.drop("total_bedrooms", axis=1)       # option 2
+sample_incomplete_rows.dropna(subset=["total_bedrooms"])  # option 1
+sample_incomplete_rows.drop("total_bedrooms", axis=1)  # option 2
 
 median = housing["total_bedrooms"].median()
-sample_incomplete_rows["total_bedrooms"].fillna(median, inplace=True) # option 3
+
+sample_incomplete_rows["total_bedrooms"].fillna(
+    median, inplace=True
+)  # option 3
 sample_incomplete_rows
 
 # do it the better way
 from sklearn.impute import SimpleImputer
+
 imputer = SimpleImputer(strategy="median")
 
 housing_num = housing.drop("ocean_proximity", axis=1)
@@ -268,91 +308,106 @@ imputer.fit(housing_num)
 imputer.statistics_
 housing_num.median().values
 X = imputer.transform(housing_num)
-housing_tr = pd.DataFrame(X, columns=housing_num.columns,
-                          index=housing.index)
+housing_tr = pd.DataFrame(X, columns=housing_num.columns, index=housing.index)
 
 housing_tr.loc[sample_incomplete_rows.index.values]
 imputer.strategy
 
-housing_tr = pd.DataFrame(X, columns=housing_num.columns,
-                          index=housing_num.index)
+housing_tr = pd.DataFrame(
+    X, columns=housing_num.columns, index=housing_num.index
+)
 housing_tr.head()
 
 
+########################################################################
 # Handling Text and Categorical Attributes
 housing_cat = housing[["ocean_proximity"]]
 housing_cat.head(10)
 
 
-from sklearn.preprocessing import OrdinalEncoder
+from sklearn.preprocessing import OrdinalEncoder, OneHotEncoder
 
+# Ordinalencoder
 ordinal_encoder = OrdinalEncoder()
 housing_cat_encoded = ordinal_encoder.fit_transform(housing_cat)
 housing_cat_encoded[:10]
-
 ordinal_encoder.categories_
-from sklearn.preprocessing import OneHotEncoder
 
+# Onehotencoder
 cat_encoder = OneHotEncoder()
 housing_cat_1hot = cat_encoder.fit_transform(housing_cat)
 housing_cat_1hot
-
 housing_cat_1hot.toarray()
 
 # cat_encoder = OneHotEncoder(sparse=False)
 cat_encoder = OneHotEncoder()
 housing_cat_1hot = cat_encoder.fit_transform(housing_cat)
 housing_cat_1hot
-
 cat_encoder.categories_
 
+########################################################################
 # Custom Transformers
-
 from sklearn.base import BaseEstimator, TransformerMixin
 
 # column index
 rooms_ix, bedrooms_ix, population_ix, households_ix = 3, 4, 5, 6
 
+
 class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
-    def __init__(self, add_bedrooms_per_room=True): # no *args or **kargs
+    def __init__(self, add_bedrooms_per_room=True):  # no *args, **kargs
         self.add_bedrooms_per_room = add_bedrooms_per_room
+
     def fit(self, X, y=None):
         return self  # nothing else to do
+
     def transform(self, X):
         rooms_per_household = X[:, rooms_ix] / X[:, households_ix]
         population_per_household = X[:, population_ix] / X[:, households_ix]
         if self.add_bedrooms_per_room:
             bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
-            return np.c_[X, rooms_per_household, population_per_household,
-                         bedrooms_per_room]
+            return np.c_[
+                X,
+                rooms_per_household,
+                population_per_household,
+                bedrooms_per_room,
+            ]
         else:
             return np.c_[X, rooms_per_household, population_per_household]
+
 
 attr_adder = CombinedAttributesAdder(add_bedrooms_per_room=False)
 housing_extra_attribs = attr_adder.transform(housing.values)
 
 
 col_names = "total_rooms", "total_bedrooms", "population", "households"
+#  get the column indices
 rooms_ix, bedrooms_ix, population_ix, households_ix = [
-    housing.columns.get_loc(c) for c in col_names] # get the column indices
+    housing.columns.get_loc(c) for c in col_names
+]
 
 
 housing_extra_attribs = pd.DataFrame(
     housing_extra_attribs,
-    columns=list(housing.columns)+["rooms_per_household", "population_per_household"],
-    index=housing.index)
+    columns=list(housing.columns)
+    + ["rooms_per_household", "population_per_household"],
+    index=housing.index,
+)
+
 housing_extra_attribs.head()
 
 
+######################################################################
 # Transformation Pipelines
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-num_pipeline = Pipeline([
+num_pipeline = Pipeline(
+    [
         ('imputer', SimpleImputer(strategy="median")),
         ('attribs_adder', CombinedAttributesAdder()),
         ('std_scaler', StandardScaler()),
-    ])
+    ]
+)
 
 housing_num_tr = num_pipeline.fit_transform(housing_num)
 
@@ -363,10 +418,12 @@ from sklearn.compose import ColumnTransformer
 num_attribs = list(housing_num)
 cat_attribs = ["ocean_proximity"]
 
-full_pipeline = ColumnTransformer([
+full_pipeline = ColumnTransformer(
+    [
         ("num", num_pipeline, num_attribs),
         ("cat", OneHotEncoder(), cat_attribs),
-    ])
+    ]
+)
 
 housing_prepared = full_pipeline.fit_transform(housing)
 
@@ -376,14 +433,18 @@ housing_prepared.shape
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-# Create a class to select numerical or categorical columns 
+# Create a class to select numerical or categorical columns
 class OldDataFrameSelector(BaseEstimator, TransformerMixin):
     def __init__(self, attribute_names):
         self.attribute_names = attribute_names
+
     def fit(self, X, y=None):
         return self
+
     def transform(self, X):
         return X[self.attribute_names].values
+
+
 # Now let's join all these components into a big pipeline that will preprocess both the numerical and the categorical features:
 
 num_attribs = list(housing_num)
@@ -453,23 +514,35 @@ tree_rmse = np.sqrt(tree_mse)
 tree_rmse
 
 
-
 # Better Evaluation Using Cross-Validation
 from sklearn.model_selection import cross_val_score
 
-scores = cross_val_score(tree_reg, housing_prepared, housing_labels,
-                         scoring="neg_mean_squared_error", cv=10)
+scores = cross_val_score(
+    tree_reg,
+    housing_prepared,
+    housing_labels,
+    scoring="neg_mean_squared_error",
+    cv=10,
+)
 tree_rmse_scores = np.sqrt(-scores)
+
+
 def display_scores(scores):
     print("Scores:", scores)
     print("Mean:", scores.mean())
     print("Standard deviation:", scores.std())
 
+
 display_scores(tree_rmse_scores)
 
 
-lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels,
-                             scoring="neg_mean_squared_error", cv=10)
+lin_scores = cross_val_score(
+    lin_reg,
+    housing_prepared,
+    housing_labels,
+    scoring="neg_mean_squared_error",
+    cv=10,
+)
 lin_rmse_scores = np.sqrt(-lin_scores)
 display_scores(lin_rmse_scores)
 
@@ -485,13 +558,24 @@ forest_rmse
 
 from sklearn.model_selection import cross_val_score
 
-forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels,
-                                scoring="neg_mean_squared_error", cv=10)
+forest_scores = cross_val_score(
+    forest_reg,
+    housing_prepared,
+    housing_labels,
+    scoring="neg_mean_squared_error",
+    cv=10,
+)
 forest_rmse_scores = np.sqrt(-forest_scores)
 display_scores(forest_rmse_scores)
 
 
-scores = cross_val_score(lin_reg, housing_prepared, housing_labels, scoring="neg_mean_squared_error", cv=10)
+scores = cross_val_score(
+    lin_reg,
+    housing_prepared,
+    housing_labels,
+    scoring="neg_mean_squared_error",
+    cv=10,
+)
 pd.Series(np.sqrt(-scores)).describe()
 
 from sklearn.svm import SVR
@@ -512,13 +596,17 @@ param_grid = [
     {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
     # then try 6 (2×3) combinations with bootstrap set as False
     {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
-  ]
+]
 
 forest_reg = RandomForestRegressor(random_state=42)
-# train across 5 folds, that's a total of (12+6)*5=90 rounds of training 
-grid_search = GridSearchCV(forest_reg, param_grid, cv=5,
-                           scoring='neg_mean_squared_error',
-                           return_train_score=True)
+# train across 5 folds, that's a total of (12+6)*5=90 rounds of training
+grid_search = GridSearchCV(
+    forest_reg,
+    param_grid,
+    cv=5,
+    scoring='neg_mean_squared_error',
+    return_train_score=True,
+)
 grid_search.fit(housing_prepared, housing_labels)
 
 grid_search.best_params_
@@ -535,13 +623,19 @@ from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import randint
 
 param_distribs = {
-        'n_estimators': randint(low=1, high=200),
-        'max_features': randint(low=1, high=8),
-    }
+    'n_estimators': randint(low=1, high=200),
+    'max_features': randint(low=1, high=8),
+}
 
 forest_reg = RandomForestRegressor(random_state=42)
-rnd_search = RandomizedSearchCV(forest_reg, param_distributions=param_distribs,
-                                n_iter=10, cv=5, scoring='neg_mean_squared_error', random_state=42)
+rnd_search = RandomizedSearchCV(
+    forest_reg,
+    param_distributions=param_distribs,
+    n_iter=10,
+    cv=5,
+    scoring='neg_mean_squared_error',
+    random_state=42,
+)
 rnd_search.fit(housing_prepared, housing_labels)
 
 cvres = rnd_search.cv_results_
@@ -553,7 +647,7 @@ feature_importances = grid_search.best_estimator_.feature_importances_
 feature_importances
 
 extra_attribs = ["rooms_per_hhold", "pop_per_hhold", "bedrooms_per_room"]
-#cat_encoder = cat_pipeline.named_steps["cat_encoder"] # old solution
+# cat_encoder = cat_pipeline.named_steps["cat_encoder"] # old solution
 cat_encoder = full_pipeline.named_transformers_["cat"]
 cat_one_hot_attribs = list(cat_encoder.categories_[0])
 attributes = num_attribs + extra_attribs + cat_one_hot_attribs
@@ -579,9 +673,14 @@ from scipy import stats
 
 confidence = 0.95
 squared_errors = (final_predictions - y_test) ** 2
-np.sqrt(stats.t.interval(confidence, len(squared_errors) - 1,
-                         loc=squared_errors.mean(),
-                         scale=stats.sem(squared_errors)))
+np.sqrt(
+    stats.t.interval(
+        confidence,
+        len(squared_errors) - 1,
+        loc=squared_errors.mean(),
+        scale=stats.sem(squared_errors),
+    )
+)
 
 
 m = len(squared_errors)
@@ -597,28 +696,36 @@ np.sqrt(mean - zmargin), np.sqrt(mean + zmargin)
 
 # Extra material
 # A full pipeline with both preparation and prediction
-full_pipeline_with_predictor = Pipeline([
-        ("preparation", full_pipeline),
-        ("linear", LinearRegression())
-    ])
+full_pipeline_with_predictor = Pipeline(
+    [("preparation", full_pipeline), ("linear", LinearRegression())]
+)
 
 full_pipeline_with_predictor.fit(housing, housing_labels)
 full_pipeline_with_predictor.predict(some_data)
-array([210644.60459286, 317768.80697211, 210956.43331178,  59218.98886849,
-       189747.55849879])
+array(
+    [
+        210644.60459286,
+        317768.80697211,
+        210956.43331178,
+        59218.98886849,
+        189747.55849879,
+    ]
+)
 # Model persistence using joblib
 my_model = full_pipeline_with_predictor
 import joblib
-joblib.dump(my_model, "my_model.pkl") # DIFF
-#...
 
-my_model_loaded = joblib.load("my_model.pkl") # DIFF
+joblib.dump(my_model, "my_model.pkl")  # DIFF
+# ...
+
+my_model_loaded = joblib.load("my_model.pkl")  # DIFF
 
 # Example SciPy distributions for RandomizedSearchCV
 
 from scipy.stats import geom, expon
-geom_distrib=geom(0.5).rvs(10000, random_state=42)
-expon_distrib=expon(scale=1).rvs(10000, random_state=42)
+
+geom_distrib = geom(0.5).rvs(10000, random_state=42)
+expon_distrib = expon(scale=1).rvs(10000, random_state=42)
 plt.hist(geom_distrib, bins=50)
 plt.show()
 plt.hist(expon_distrib, bins=50)
