@@ -484,36 +484,45 @@ cat_attribs = ["ocean_proximity"]
 
 # np.allclose(housing_prepared, old_housing_prepared)
 
+############################################
+############################################
+############################################
 # Select and Train a Model
 ## Training and Evaluating on the Training Set
+
+######################
+# starting with linear regression
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 lin_reg = LinearRegression()
 lin_reg.fit(housing_prepared, housing_labels)
 
-## let's try the full preprocessing pipeline on a few training instances
+## try full preprocessing pipeline on a few training instances
 some_data = housing.iloc[:5]
 some_data_prepared = full_pipeline.transform(some_data)
-
 some_labels = housing_labels.iloc[:5]
-
 lin_reg.predict(some_data_prepared)
 
 list(some_labels)
 some_data_prepared
 
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+
 
 housing_predictions = lin_reg.predict(housing_prepared)
 
-lin_mse = mean_squared_error(housing_labels, housing_predictions)
-lin_rmse = np.sqrt(lin_mse)
+# lin_mse = mean_squared_error(housing_labels, housing_predictions)
+# lin_rmse = np.sqrt(lin_mse)
+lin_rmse = np.sqrt(mean_squared_error(housing_labels, housing_predictions))
+lin_rmse
 
 lin_mae = mean_absolute_error(housing_labels, housing_predictions)
-
-lin_rmse
 lin_mae
 
+
+######################
+######################
+# Decision Trees
 from sklearn.tree import DecisionTreeRegressor
 
 tree_reg = DecisionTreeRegressor(random_state=42)
@@ -535,6 +544,7 @@ scores = cross_val_score(
     scoring="neg_mean_squared_error",
     cv=10,
 )
+
 tree_rmse_scores = np.sqrt(-scores)
 
 
@@ -559,6 +569,8 @@ lin_rmse_scores = np.sqrt(-lin_scores)
 
 display_scores(lin_rmse_scores)
 
+######################
+# Random Forests
 from sklearn.ensemble import RandomForestRegressor
 
 forest_reg = RandomForestRegressor(n_estimators=100, random_state=42)
@@ -569,7 +581,6 @@ forest_mse = mean_squared_error(housing_labels, housing_predictions)
 forest_rmse = np.sqrt(forest_mse)
 forest_rmse
 
-from sklearn.model_selection import cross_val_score
 
 forest_scores = cross_val_score(
     forest_reg,
@@ -591,6 +602,9 @@ scores = cross_val_score(
 )
 pd.Series(np.sqrt(-scores)).describe()
 
+
+############################################
+# Support Vector Machines
 from sklearn.svm import SVR
 
 svm_reg = SVR(kernel="linear")
@@ -600,10 +614,15 @@ svm_mse = mean_squared_error(housing_labels, housing_predictions)
 svm_rmse = np.sqrt(svm_mse)
 svm_rmse
 
+##########################################################################
+##########################################################################
+##########################################################################
 ## Fine-Tune Your Model
+
 # Grid Search
 from sklearn.model_selection import GridSearchCV
 
+# Parameters Grid
 param_grid = [
     # try 12 (3×4) combinations of hyperparameters
     {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
@@ -611,6 +630,7 @@ param_grid = [
     {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
 ]
 
+# Random Forset: Parameter Tuning
 forest_reg = RandomForestRegressor(random_state=42)
 # train across 5 folds, that's a total of (12+6)*5=90 rounds of training
 grid_search = GridSearchCV(
@@ -627,10 +647,13 @@ grid_search.best_params_
 grid_search.best_estimator_
 
 cvres = grid_search.cv_results_
+
 for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
     print(np.sqrt(-mean_score), params)
 pd.DataFrame(grid_search.cv_results_)
 
+############################################
+############################################
 # Randomized Search
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import randint
@@ -652,9 +675,10 @@ rnd_search = RandomizedSearchCV(
 
 rnd_search.fit(housing_prepared, housing_labels)
 
+
 cvres = rnd_search.cv_results_
 for mean_score, params in zip(cvres["mean_test_score"], cvres["params"]):
-    print(np.sqrt(-mean_score), params)
+    print(np.round(np.sqrt(-mean_score),5), params)
 
 # Analyze the Best Models and Their Errors
 feature_importances = grid_search.best_estimator_.feature_importances_

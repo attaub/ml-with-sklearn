@@ -36,7 +36,11 @@ for set_ in (strat_train_set, strat_test_set):
 
 housing = strat_train_set.copy()
 
-# Transformation Pipelines
+##### drop labels for training set
+housing = strat_train_set.drop("median_house_value", axis=1)
+housing_labels = strat_train_set["median_house_value"].copy()
+
+##### Transformation Pipelines
 
 num_pipeline = Pipeline(
     [
