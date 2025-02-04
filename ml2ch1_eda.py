@@ -57,7 +57,6 @@ plt.show()
 #  Geolocation coordinates are unique
 
 
-
 ##################################################################
 ##################################################################
 # train_test split
@@ -234,7 +233,7 @@ attributes = [
     "housing_median_age",
 ]
 
-scatter_matrix(housing[attributes], figsize=(12, 8))
+pd.plotting.scatter_matrix(housing[attributes], figsize=(12, 8))
 save_fig("scatter_matrix_plot")
 
 
@@ -301,6 +300,7 @@ from sklearn.impute import SimpleImputer
 
 imputer = SimpleImputer(strategy="median")
 
+
 housing_num = housing.drop("ocean_proximity", axis=1)
 # alternatively: housing_num = housing.select_dtypes(include=[np.number])
 
@@ -358,7 +358,7 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
         self.add_bedrooms_per_room = add_bedrooms_per_room
 
     def fit(self, X, y=None):
-        return self  # nothing else to do
+        return self  # nothing else to do # required for sklearn pipelines
 
     def transform(self, X):
         rooms_per_household = X[:, rooms_ix] / X[:, households_ix]
@@ -400,6 +400,7 @@ housing_extra_attribs.head()
 # Transformation Pipelines
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.compose import ColumnTransformer
 
 num_pipeline = Pipeline(
     [
@@ -409,11 +410,9 @@ num_pipeline = Pipeline(
     ]
 )
 
-housing_num_tr = num_pipeline.fit_transform(housing_num)
+# housing_num_tr = num_pipeline.fit_transform(housing_num)
+# housing_num_tr
 
-housing_num_tr
-
-from sklearn.compose import ColumnTransformer
 
 num_attribs = list(housing_num)
 cat_attribs = ["ocean_proximity"]
@@ -425,9 +424,21 @@ full_pipeline = ColumnTransformer(
     ]
 )
 
+# housing_num = housing.drop("ocean_proximity", axis=1)
+# num_attribs = list(housing.drop("ocean_proximity", axis=1))
+# cat_attribs = ["ocean_proximity"]
+
+full_pipeline_2 = ColumnTransformer(
+    [
+        ("num", num_pipeline, list(housing.drop("ocean_proximity", axis=1))),
+        ("cat", OneHotEncoder(), ["ocean_proximity"]),
+    ]
+)
 housing_prepared = full_pipeline.fit_transform(housing)
+housing_prepared_2 = full_pipeline_2.fit_transform(housing)
 
 housing_prepared.shape
+
 
 # For reference, here is the old solution based on a DataFrameSelector transformer (to just select a subset of the Pandas DataFrame columns), and a FeatureUnion:
 
@@ -482,25 +493,25 @@ lin_reg.fit(housing_prepared, housing_labels)
 
 ## let's try the full preprocessing pipeline on a few training instances
 some_data = housing.iloc[:5]
-some_labels = housing_labels.iloc[:5]
 some_data_prepared = full_pipeline.transform(some_data)
 
-print("Predictions:", lin_reg.predict(some_data_prepared))
+some_labels = housing_labels.iloc[:5]
 
-print("Labels:", list(some_labels))
+lin_reg.predict(some_data_prepared)
 
+list(some_labels)
 some_data_prepared
 
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 housing_predictions = lin_reg.predict(housing_prepared)
+
 lin_mse = mean_squared_error(housing_labels, housing_predictions)
 lin_rmse = np.sqrt(lin_mse)
-lin_rmse
-
-from sklearn.metrics import mean_absolute_error
 
 lin_mae = mean_absolute_error(housing_labels, housing_predictions)
+
+lin_rmse
 lin_mae
 
 from sklearn.tree import DecisionTreeRegressor
@@ -543,7 +554,9 @@ lin_scores = cross_val_score(
     scoring="neg_mean_squared_error",
     cv=10,
 )
+
 lin_rmse_scores = np.sqrt(-lin_scores)
+
 display_scores(lin_rmse_scores)
 
 from sklearn.ensemble import RandomForestRegressor
