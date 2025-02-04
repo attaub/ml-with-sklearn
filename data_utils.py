@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy as np 
 import tarfile
 import urllib.request
 import pandas as pd
@@ -11,6 +12,7 @@ mpl.rc('axes', labelsize=14)
 mpl.rc('xtick', labelsize=12)
 mpl.rc('ytick', labelsize=12)
 
+from sklearn.base import BaseEstimator, TransformerMixin
 
 # Where to save the figures
 PROJECT_ROOT_DIR = "."
@@ -48,3 +50,31 @@ def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
 def load_housing_data(housing_path=HOUSING_PATH):
     csv_path = os.path.join(housing_path, "housing.csv")
     return pd.read_csv(csv_path)
+
+##################################################################
+# column index
+rooms_ix, bedrooms_ix, population_ix, households_ix = 3, 4, 5, 6
+
+
+class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
+    def __init__(self, add_bedrooms_per_room=True):  # no *args, **kargs
+        self.add_bedrooms_per_room = add_bedrooms_per_room
+
+    def fit(self, X, y=None):
+        return self  # nothing else to do # required for sklearn pipelines
+
+    def transform(self, X):
+        rooms_per_household = X[:, rooms_ix] / X[:, households_ix]
+        population_per_household = X[:, population_ix] / X[:, households_ix]
+        if self.add_bedrooms_per_room:
+            bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
+            return np.c_[
+                X,
+                rooms_per_household,
+                population_per_household,
+                bedrooms_per_room,
+            ]
+        else:
+            return np.c_[X, rooms_per_household, population_per_household]
+
+

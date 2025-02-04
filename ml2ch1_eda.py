@@ -636,6 +636,7 @@ rnd_search = RandomizedSearchCV(
     scoring='neg_mean_squared_error',
     random_state=42,
 )
+
 rnd_search.fit(housing_prepared, housing_labels)
 
 cvres = rnd_search.cv_results_
