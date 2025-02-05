@@ -105,6 +105,7 @@ def income_cat_proportions(data):
 train_set, test_set = train_test_split(housing, test_size=0.2, random_state=42)
 
 #############################################
+# check if test set representative of dataset  
 
 compare_props = pd.DataFrame(
     {
@@ -172,9 +173,11 @@ plt.show()
 # clustering algorithm to add new features
 # ocean proximity is useful
 
+
+############################################
 # Looking for correlations
 #
-
+######################
 # Select only numeric columns
 housing_numerical = housing.select_dtypes(include=['number'])
 corr_matrix = housing_numerical.corr()
@@ -380,11 +383,11 @@ housing_extra_attribs = attr_adder.transform(housing.values)
 
 
 col_names = "total_rooms", "total_bedrooms", "population", "households"
+
 #  get the column indices
 rooms_ix, bedrooms_ix, population_ix, households_ix = [
     housing.columns.get_loc(c) for c in col_names
 ]
-
 
 housing_extra_attribs = pd.DataFrame(
     housing_extra_attribs,
