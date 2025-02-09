@@ -50,10 +50,11 @@ from sklearn.linear_model import SGDClassifier
 
 sgd_clf = SGDClassifier(max_iter=1000, tol=1e-3, random_state=42)
 sgd_clf.fit(X_train, y_train_5)
+sgd_clf.predict([some_digit])
 
 ############################################
 # performance measures
-# measuring accuracy using cross-validation
+# measuring accuracy using cross-validation: Manually
 from sklearn.model_selection import StratifiedKFold
 from sklearn.base import clone
 
@@ -61,19 +62,21 @@ skfolds = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
 
 for train_index, test_index in skfolds.split(X_train, y_train_5):
 
-    clone_clf = clone(sgd_clf)
-
     X_train_folds = X_train[train_index]
     X_test_fold = X_train[test_index]
 
     y_train_folds = y_train_5[train_index]
     y_test_fold = y_train_5[test_index]
 
+    clone_clf = clone(sgd_clf)
     clone_clf.fit(X_train_folds, y_train_folds)
+
     y_pred = clone_clf.predict(X_test_fold)
+
     n_correct = sum(y_pred == y_test_fold)
     print(n_correct / len(y_pred))
 
+cross_val_score(sgd_clf, X_train, y_train_5, cv=3, scoring='accuracy')
 ############################################
 from sklearn.base import BaseEstimator
 
@@ -90,13 +93,12 @@ from sklearn.model_selection import cross_val_score
 
 never_5_clf = Never5Classifier()
 cross_val_score(never_5_clf, X_train, y_train_5, cv=3, scoring="accuracy")
-
+# only 10% of digits are some_digit.
 ############################################
 ############################################
 # Confusion Matrix
-from sklearn.model_selection import cross_val_predict
-
 from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import cross_val_predict
 
 y_train_pred = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3)
 confusion_matrix(y_train_5, y_train_pred)
@@ -110,10 +112,8 @@ confusion_matrix(y_train_5, y_train_perfect_predictions)
 
 """
 confusion_matrix:
-[
-    [TN FP]
-    [FN TP]
-]
+[[TN FP]
+[FN TP]]
 
 FP:=> T0
 FN:=> T1
@@ -121,10 +121,12 @@ FN:=> T1
 ######################
 # Confusion Matrix
 cm = confusion_matrix(y_train_5, y_train_pred)
+
 true_negative = cm[0, 0]
+true_positive = cm[1, 1]
+
 false_positive = cm[0, 1]
 false_negative = cm[1, 0]
-true_positive = cm[1, 1]
 
 ######################
 # Accuracy
@@ -1210,6 +1212,6 @@ log_clf.fit(X_train_transformed, y_train)
 y_pred = log_clf.predict(X_test_transformed)
 
 print("Precision: {:.2f}%".format(100 * precision_score(y_test, y_pred)))
-print("Recall: {:.2f}%".format(100 * recall_score(y_test, y_pred)))
-# Precision: 95.88%
-# Recall: 97.89%
+"""
+
+"""
