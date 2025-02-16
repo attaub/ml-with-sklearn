@@ -36,7 +36,7 @@ def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
     housing_tgz.close()
 
 
-fetch_housing_data()
+# fetch_housing_data()
 
 
 def save_fig(fig_id, tight_layout=True, fig_extension="png", resolution=300):
@@ -51,8 +51,8 @@ def load_housing_data(housing_path=HOUSING_PATH):
     csv_path = os.path.join(housing_path, "housing.csv")
     return pd.read_csv(csv_path)
 
-##################################################################
-# column index
+# ##################################################################
+# # column index
 rooms_ix, bedrooms_ix, population_ix, households_ix = 3, 4, 5, 6
 
 

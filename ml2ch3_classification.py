@@ -358,7 +358,7 @@ cross_val_score(sgd_clf, X_train_scaled, y_train, cv=3, scoring="accuracy")
 # Error Analysis
 
 ######################
-# predictions: based on cross validation
+# Predictions: based on cross validation
 y_train_pred = cross_val_predict(sgd_clf, X_train_scaled, y_train, cv=3)
 
 ######################
@@ -424,7 +424,7 @@ y_multilabel = np.c_[y_train_large, y_train_odd]
 knn_clf = KNeighborsClassifier()
 knn_clf.fit(X_train, y_multilabel)
 KNeighborsClassifier()
-knn_clf.predict([some_digit])
+kn_clf.predict([some_digit])
 
 y_train_knn_pred = cross_val_predict(knn_clf, X_train, y_multilabel, cv=3)
 f1_score(y_multilabel, y_train_knn_pred, average="macro")
@@ -521,10 +521,9 @@ plot_digit(ambiguous_digit)
 #######################################################
 #######################################################
 # Exercise solutions
-""" 
-1. An MNIST Classifier With Over 97% Accuracy
-The following code may take close to 16 hours to run, or more depending on your hardware.
-"""
+## 1. An MNIST Classifier With Over 97% Accuracy
+
+
 from sklearn.model_selection import GridSearchCV
 
 param_grid = [{'weights': ["uniform", "distance"], 'n_neighbors': [3, 4, 5]}]
@@ -535,19 +534,21 @@ grid_search.fit(X_train, y_train)
 
 
 grid_search.best_params_
-# {'n_neighbors': 4, 'weights': 'distance'}
 grid_search.best_score_
-# 0.9716166666666666
+
 from sklearn.metrics import accuracy_score
 
 y_pred = grid_search.predict(X_test)
 accuracy_score(y_test, y_pred)
-# 0.9714
+
 
 ############################################
 # 2. Data Augmentation
 
-    return shifted_image.reshape([-1])
+def shift_image():
+    # return shifted_image.reshape([-1])
+    pass
+
 image = X_train[1000]
 shifted_image_down = shift_image(image, 0, 5)
 shifted_image_left = shift_image(image, -5, 0)
@@ -589,12 +590,8 @@ accuracy_score(y_test, y_pred)
 # 0.9763
 # By simply augmenting the data, we got a 0.5% accuracy boost. :)
 
-#
-
-""" 
-3. Tackle the Titanic dataset
-The goal is to predict whether or not a passenger survived based on attributes such as their age, sex, passenger class, where they embarked and so on.
-"""
+# 3. Tackle the Titanic dataset
+## predict if a passenger survived based on provided attributes 
 
 import os
 import urllib.request
@@ -630,29 +627,22 @@ test_data = load_titanic_data("test.csv")
 train_data.head()
 
 """
-The attributes have the following meaning:
-
-PassengerId: a unique identifier for each passenger
-Survived: that's the target, 0 means the passenger did not survive, while 1 means he/she survived.
+PassengerId: 
+Survived: 
 Pclass: passenger class.
-Name, Sex, Age: self-explanatory
+Name, Sex, Age
 SibSp: how many siblings & spouses of the passenger aboard the Titanic.
 Parch: how many children & parents of the passenger aboard the Titanic.
 Ticket: ticket id
 Fare: price paid (in pounds)
 Cabin: passenger's cabin number
 Embarked: where the passenger embarked the Titanic
-Let's explicitly set the PassengerId column as the index column:
- """
+"""
 
 train_data = train_data.set_index("PassengerId")
 test_data = test_data.set_index("PassengerId")
 
-# Let's get more info to see how much data is missing:
-
-
 train_data.info()
-
 
 train_data[train_data["Sex"]=="female"]["Age"].median()
 
@@ -1212,6 +1202,3 @@ log_clf.fit(X_train_transformed, y_train)
 y_pred = log_clf.predict(X_test_transformed)
 
 print("Precision: {:.2f}%".format(100 * precision_score(y_test, y_pred)))
-"""
-
-"""
