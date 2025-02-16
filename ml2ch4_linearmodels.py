@@ -7,11 +7,7 @@ from data_utils import *
 
 np.random.seed(42)
 
-PROJECT_ROOT_DIR = "."
-CHAPTER_ID = "training_linear_models"
-IMAGES_PATH = os.path.join(PROJECT_ROOT_DIR, "images", CHAPTER_ID)
-os.makedirs(IMAGES_PATH, exist_ok=True)
-
+# Simple Linear Regression, using normal equations
 X = 2 * np.random.rand(100, 1)
 y = 4 + 3 * X + np.random.randn(100, 1)
 
@@ -43,6 +39,7 @@ save_fig("linear_model_predictions_plot")
 plt.show()
 
 
+# Linera Regression using sklearn 
 from sklearn.linear_model import LinearRegression
 
 lin_reg = LinearRegression()
@@ -59,7 +56,16 @@ np.linalg.pinv(X_b).dot(y)
 
 
 # Gradient Descent
-## Batch Gradient Descent
+# f(x;theta) = X Theta = theat_0 + theat_1 x_1 + ... + theat_n x_n  
+#J(Theat)= || Y - f(X:Theta)||^2/(2m)
+# Theta_j := Theta_j - eta J_(theta_j)
+# = theta_j - eta (1/m) sum_{i=1}^{j} (f(x^{i}:theat)-y^{i})x_j^{i} 
+
+
+# Linera Regression using sklearn using Gradient Descent
+# Batch Gradient Descent
+
+
 
 eta = 0.1  # learning rate
 n_iterations = 1000
@@ -108,7 +114,6 @@ plot_gradient_descent(theta, eta=0.1, theta_path=theta_path_bgd)
 plt.subplot(133)
 plot_gradient_descent(theta, eta=0.5)
 
-save_fig("gradient_descent_plot")
 plt.show()
 
 ## Stochastic Gradient Descent
@@ -145,12 +150,11 @@ plt.plot(X, y, "b.")  # not shown
 plt.xlabel("$x_1$", fontsize=18)  # not shown
 plt.ylabel("$y$", rotation=0, fontsize=18)  # not shown
 plt.axis([0, 2, 0, 15])  # not shown
-save_fig("sgd_plot")  # not shown
 plt.show()  # not shown
 
 theta
 
-from sklearn.linear_model import SGDRegressor
+# SGD using sklearr_model import SGDRegressor
 
 sgd_reg = SGDRegressor(
     max_iter=1000, tol=1e-3, penalty=None, eta0=0.1, random_state=42
@@ -227,26 +231,15 @@ save_fig("gradient_descent_paths_plot")
 plt.show()
 
 
-# # Polynomial Regression
-
-# In[27]:
-
-
+# Polynomial Regression
 import numpy as np
 import numpy.random as rnd
-
 np.random.seed(42)
-
-
-# In[28]:
 
 
 m = 100
 X = 6 * np.random.rand(m, 1) - 3
 y = 0.5 * X**2 + X + 2 + np.random.randn(m, 1)
-
-
-# In[29]:
 
 
 plt.plot(X, y, "b.")
@@ -257,8 +250,6 @@ save_fig("quadratic_data_plot")
 plt.show()
 
 
-# In[30]:
-
 
 from sklearn.preprocessing import PolynomialFeatures
 
@@ -266,22 +257,11 @@ poly_features = PolynomialFeatures(degree=2, include_bias=False)
 X_poly = poly_features.fit_transform(X)
 X[0]
 
-
-# In[31]:
-
-
 X_poly[0]
-
-
-# In[32]:
-
 
 lin_reg = LinearRegression()
 lin_reg.fit(X_poly, y)
 lin_reg.intercept_, lin_reg.coef_
-
-
-# In[33]:
 
 
 X_new = np.linspace(-3, 3, 100).reshape(100, 1)
@@ -296,8 +276,6 @@ plt.axis([-3, 3, 0, 10])
 save_fig("quadratic_predictions_plot")
 plt.show()
 
-
-# In[34]:
 
 
 from sklearn.preprocessing import StandardScaler
@@ -327,11 +305,7 @@ save_fig("high_degree_polynomials_plot")
 plt.show()
 
 
-# # Learning Curves
-
-# In[35]:
-
-
+###########################################  Learning Curves
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
 
@@ -365,8 +339,6 @@ save_fig("underfitting_learning_curves_plot")  # not shown
 plt.show()  # not shown
 
 
-# In[37]:
-
 
 from sklearn.pipeline import Pipeline
 
@@ -382,22 +354,16 @@ plt.axis([0, 80, 0, 3])  # not shown
 save_fig("learning_curves_plot")  # not shown
 plt.show()  # not shown
 
-
-# # Regularized Linear Models
-
-# ## Ridge Regression
-
-# In[38]:
-
+############################################
+############################################
+# Regularized Linear Models
+## Ridge Regression
 
 np.random.seed(42)
 m = 20
 X = 3 * np.random.rand(m, 1)
 y = 1 + 0.5 * X + np.random.randn(m, 1) / 1.5
 X_new = np.linspace(0, 3, 100).reshape(100, 1)
-
-
-# In[39]:
 
 
 from sklearn.linear_model import Ridge
@@ -407,18 +373,9 @@ ridge_reg.fit(X, y)
 ridge_reg.predict([[1.5]])
 
 
-# In[40]:
-
-
 ridge_reg = Ridge(alpha=1, solver="sag", random_state=42)
 ridge_reg.fit(X, y)
 ridge_reg.predict([[1.5]])
-
-
-# In[41]:
-
-
-from sklearn.linear_model import Ridge
 
 
 def plot_model(model_class, polynomial, alphas, **model_kargs):
@@ -475,12 +432,8 @@ sgd_reg = SGDRegressor(penalty="l2", max_iter=1000, tol=1e-3, random_state=42)
 sgd_reg.fit(X, y.ravel())
 sgd_reg.predict([[1.5]])
 
-
-# ## Lasso Regression
-
-# In[43]:
-
-
+############################################
+######################## Lasso Regression
 from sklearn.linear_model import Lasso
 
 plt.figure(figsize=(8, 4))
@@ -493,22 +446,13 @@ plot_model(Lasso, polynomial=True, alphas=(0, 10**-7, 1), random_state=42)
 save_fig("lasso_regression_plot")
 plt.show()
 
-
-# In[44]:
-
-
-from sklearn.linear_model import Lasso
-
 lasso_reg = Lasso(alpha=0.1)
 lasso_reg.fit(X, y)
 lasso_reg.predict([[1.5]])
 
-
-# ## Elastic Net
-
-# In[45]:
-
-
+############################################
+############################################
+## Elastic Net
 from sklearn.linear_model import ElasticNet
 
 elastic_net = ElasticNet(alpha=0.1, l1_ratio=0.5, random_state=42)
@@ -516,11 +460,8 @@ elastic_net.fit(X, y)
 elastic_net.predict([[1.5]])
 
 
-# ## Early Stopping
-
-# In[46]:
-
-
+############################################
+## Early Stopping
 np.random.seed(42)
 m = 100
 X = 6 * np.random.rand(m, 1) - 3
@@ -531,9 +472,8 @@ X_train, X_val, y_train, y_val = train_test_split(
 )
 
 
-# In[47]:
-
-
+############################################
+############################################
 from copy import deepcopy
 
 poly_scaler = Pipeline(
@@ -616,22 +556,11 @@ save_fig("early_stopping_plot")
 plt.show()
 
 
-# In[49]:
-
-
+#######################
 best_epoch, best_model
 
 
-# In[50]:
-
-
 get_ipython().run_line_magic('matplotlib', 'inline')
-import matplotlib.pyplot as plt
-import numpy as np
-
-
-# In[51]:
-
 
 t1a, t1b, t2a, t2b = -1, 3, -1.5, 1.5
 
@@ -652,8 +581,6 @@ t1_min, t2_min = t1[t_min_idx], t2[t_min_idx]
 
 t_init = np.array([[0.25], [-1]])
 
-
-# In[52]:
 
 
 def bgd_path(theta, X, y, l1, l2, core=1, eta=0.05, n_iterations=200):
@@ -725,13 +652,10 @@ for i, N, l1, l2, title in (
 save_fig("lasso_vs_ridge_plot")
 plt.show()
 
-
-# # Logistic Regression
-
-# ## Decision Boundaries
-
-# In[53]:
-
+############################################
+############################################
+# Logistic Regression
+# Decision Boundaries
 
 t = np.linspace(-10, 10, 100)
 sig = 1 / (1 + np.exp(-t))
@@ -749,32 +673,21 @@ plt.axis([-10, 10, -0.1, 1.1])
 save_fig("logistic_function_plot")
 plt.show()
 
-
-# In[54]:
-
+############################################
+#IRIS
 
 from sklearn import datasets
-
 iris = datasets.load_iris()
 list(iris.keys())
-
-
-# In[55]:
-
-
 print(iris.DESCR)
 
 
-# In[56]:
+X = iris["data"][:, 3:]  
+# y = (iris["target"] == 2).astype(np.int)  # 1 if Iris virginica, else 0
+y = (iris["target"] == 2)*1
 
 
-X = iris["data"][:, 3:]  # petal width
-y = (iris["target"] == 2).astype(np.int)  # 1 if Iris virginica, else 0
-
-
-# **Note**: To be future-proof we set `solver="lbfgs"` since this will be the default value in Scikit-Learn 0.22.
-
-# In[57]:
+#Note: To be future-proof we set `solver="lbfgs"` since this will be the default value in Scikit-Learn 0.22.
 
 
 from sklearn.linear_model import LogisticRegression
@@ -782,21 +695,15 @@ from sklearn.linear_model import LogisticRegression
 log_reg = LogisticRegression(solver="lbfgs", random_state=42)
 log_reg.fit(X, y)
 
-
-# In[58]:
-
-
 X_new = np.linspace(0, 3, 1000).reshape(-1, 1)
 y_proba = log_reg.predict_proba(X_new)
 
-plt.plot(X_new, y_proba[:, 1], "g-", linewidth=2, label="Iris virginica")
+plt.plot(X_new, y_proba[:, 1], "g-", linewidth=4, label="Iris virginica")
 plt.plot(X_new, y_proba[:, 0], "b--", linewidth=2, label="Not Iris virginica")
+plt.show()
 
 
-# The figure in the book actually is actually a bit fancier:
-
-# In[59]:
-
+# The figure in the book 
 
 X_new = np.linspace(0, 3, 1000).reshape(-1, 1)
 y_proba = log_reg.predict_proba(X_new)
@@ -816,26 +723,9 @@ plt.text(
     color="k",
     ha="center",
 )
-plt.arrow(
-    decision_boundary,
-    0.08,
-    -0.3,
-    0,
-    head_width=0.05,
-    head_length=0.1,
-    fc='b',
-    ec='b',
-)
-plt.arrow(
-    decision_boundary,
-    0.92,
-    0.3,
-    0,
-    head_width=0.05,
-    head_length=0.1,
-    fc='g',
-    ec='g',
-)
+# plt.arrow(decision_boundary, 0.08, -0.3, 0, head_width=0.05, head_length=0.1, fc='b', ec='b')
+# plt.arrow(decision_boundary, 0.92, 0.3, 0, head_width=0.05, head_length=0.1, fc='g', ec='g')
+
 plt.xlabel("Petal width (cm)", fontsize=14)
 plt.ylabel("Probability", fontsize=14)
 plt.legend(loc="center left", fontsize=14)
@@ -844,22 +734,11 @@ save_fig("logistic_regression_plot")
 plt.show()
 
 
-# In[60]:
-
 
 decision_boundary
 
 
-# In[61]:
-
-
 log_reg.predict([[1.7], [1.5]])
-
-
-# ## Softmax Regression
-
-# In[62]:
-
 
 from sklearn.linear_model import LogisticRegression
 
@@ -902,8 +781,8 @@ save_fig("logistic_regression_contour_plot")
 plt.show()
 
 
-# In[63]:
-
+############################################
+############################################
 
 X = iris["data"][:, (2, 3)]  # petal length, petal width
 y = iris["target"]
@@ -913,8 +792,6 @@ softmax_reg = LogisticRegression(
 )
 softmax_reg.fit(X, y)
 
-
-# In[64]:
 
 
 x0, x1 = np.meshgrid(
@@ -949,24 +826,13 @@ plt.axis([0, 7, 0, 3.5])
 save_fig("softmax_regression_contour_plot")
 plt.show()
 
-
-# In[65]:
-
-
 softmax_reg.predict([[5, 2]])
-
-
-# In[66]:
-
 
 softmax_reg.predict_proba([[5, 2]])
 
-
 # # Exercise solutions
 
-# ## 1. to 11.
-
-# See appendix A.
+#  For 1 to 11, See appendix A.
 
 # ## 12. Batch Gradient Descent with early stopping for Softmax Regression
 # (without using Scikit-Learn)
