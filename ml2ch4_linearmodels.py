@@ -4,117 +4,61 @@ import sklearn
 import numpy as np
 import matplotlib.pyplot as plt
 from data_utils import *
+from ml2ch4_utils import * 
+from sklearn.linear_model import LinearRegression
 
 np.random.seed(42)
 
 # Simple Linear Regression, using normal equations
 X = 2 * np.random.rand(100, 1)
 y = 4 + 3 * X + np.random.randn(100, 1)
-
-plt.plot(X, y, "b.")
-plt.xlabel("$x_1$", fontsize=18)
-plt.ylabel("$y$", rotation=0, fontsize=18)
-plt.axis([0, 2, 0, 15])
-save_fig("generated_data_plot")
-plt.show()
+plot_data_first(X,y)
 
 X_b = np.c_[np.ones((100, 1)), X]  # add x0 = 1 to each instance
 theta_best = np.linalg.inv(X_b.T.dot(X_b)).dot(X_b.T).dot(y)
 
-theta_best
-
 X_new = np.array([[0], [2]])
-X_new_b = np.c_[np.ones((2, 1)), X_new]  # add x0 = 1 to each instance
+X_new_b = np.c_[np.ones((2, 1)), X_new]  
 y_predict = X_new_b.dot(theta_best)
-y_predict
-
-
-plt.plot(X_new, y_predict, "r-", linewidth=2, label="Predictions")
-plt.plot(X, y, "b.")
-plt.xlabel("$x_1$", fontsize=18)
-plt.ylabel("$y$", rotation=0, fontsize=18)
-plt.legend(loc="upper left", fontsize=14)
-plt.axis([0, 2, 0, 15])
-save_fig("linear_model_predictions_plot")
-plt.show()
+print(y_predict)
+plot_predictions_1(X, y, X_new, y_predict)
 
 
 # Linera Regression using sklearn 
-from sklearn.linear_model import LinearRegression
 
 lin_reg = LinearRegression()
 lin_reg.fit(X, y)
-lin_reg.intercept_, lin_reg.coef_
-lin_reg.predict(X_new)
+print(lin_reg.intercept_, lin_reg.coef_)
+print(lin_reg.predict(X_new))
 
 
 theta_best_svd, residuals, rank, s = np.linalg.lstsq(X_b, y, rcond=1e-6)
 theta_best_svd
-
-
 np.linalg.pinv(X_b).dot(y)
 
-
 # Gradient Descent
-# f(x;theta) = X Theta = theat_0 + theat_1 x_1 + ... + theat_n x_n  
-#J(Theat)= || Y - f(X:Theta)||^2/(2m)
-# Theta_j := Theta_j - eta J_(theta_j)
-# = theta_j - eta (1/m) sum_{i=1}^{j} (f(x^{i}:theat)-y^{i})x_j^{i} 
-
-
-# Linera Regression using sklearn using Gradient Descent
 # Batch Gradient Descent
 
-
-
-eta = 0.1  # learning rate
-n_iterations = 1000
 m = 100
+eta = 0.1  
+n_iterations = 1000
+theta = np.random.randn(2, 1)  
 
-theta = np.random.randn(2, 1)  # random initialization
+def bgd_theta(X_b, m, theta, n_iterations, eta):
+    for iteration in range(n_iterations):
+        gradients = 2 / m * X_b.T.dot(X_b.dot(theta) - y)
+        theta = theta - eta * gradients
+    return theta
 
-for iteration in range(n_iterations):
-    gradients = 2 / m * X_b.T.dot(X_b.dot(theta) - y)
-    theta = theta - eta * gradients
-
-theta
+theta = bgd_theta(X_b, m, theta, n_iterations, eta)
 
 X_new_b.dot(theta)
 
 theta_path_bgd = []
-
-
-def plot_gradient_descent(theta, eta, theta_path=None):
-    m = len(X_b)
-    plt.plot(X, y, "b.")
-    n_iterations = 1000
-    for iteration in range(n_iterations):
-        if iteration < 10:
-            y_predict = X_new_b.dot(theta)
-            style = "b-" if iteration > 0 else "r--"
-            plt.plot(X_new, y_predict, style)
-        gradients = 2 / m * X_b.T.dot(X_b.dot(theta) - y)
-        theta = theta - eta * gradients
-        if theta_path is not None:
-            theta_path.append(theta)
-    plt.xlabel("$x_1$", fontsize=18)
-    plt.axis([0, 2, 0, 15])
-    plt.title(r"$\eta = {}$".format(eta), fontsize=16)
-
-
 np.random.seed(42)
-theta = np.random.randn(2, 1)  # random initialization
+theta = np.random.randn(2, 1)  
+plot_bgd(X_b,X,y,X_new, theta, theta_path_bgd)
 
-plt.figure(figsize=(10, 4))
-plt.subplot(131)
-plot_gradient_descent(theta, eta=0.02)
-plt.ylabel("$y$", rotation=0, fontsize=18)
-plt.subplot(132)
-plot_gradient_descent(theta, eta=0.1, theta_path=theta_path_bgd)
-plt.subplot(133)
-plot_gradient_descent(theta, eta=0.5)
-
-plt.show()
 
 ## Stochastic Gradient Descent
 
@@ -134,27 +78,28 @@ theta = np.random.randn(2, 1)  # random initialization
 
 for epoch in range(n_epochs):
     for i in range(m):
-        if epoch == 0 and i < 20:  # not shown in the book
-            y_predict = X_new_b.dot(theta)  # not shown
-            style = "b-" if i > 0 else "r--"  # not shown
-            plt.plot(X_new, y_predict, style)  # not shown
+        if epoch == 0 and i < 20:  
+            y_predict = X_new_b.dot(theta)  
+            style = "b-" if i > 0 else "r--"  
+            plt.plot(X_new, y_predict, style)  
         random_index = np.random.randint(m)
         xi = X_b[random_index : random_index + 1]
         yi = y[random_index : random_index + 1]
         gradients = 2 * xi.T.dot(xi.dot(theta) - yi)
         eta = learning_schedule(epoch * m + i)
         theta = theta - eta * gradients
-        theta_path_sgd.append(theta)  # not shown
+        theta_path_sgd.append(theta)  
 
-plt.plot(X, y, "b.")  # not shown
-plt.xlabel("$x_1$", fontsize=18)  # not shown
-plt.ylabel("$y$", rotation=0, fontsize=18)  # not shown
-plt.axis([0, 2, 0, 15])  # not shown
+plt.plot(X, y, "b.")  
+plt.xlabel("$x_1$", fontsize=18)  
+plt.ylabel("$y$", rotation=0, fontsize=18)  
+plt.axis([0, 2, 0, 15])  
 plt.show()  # not shown
 
 theta
 
 # SGD using sklearr_model import SGDRegressor
+from sklearn.linear_model import SGDRegressor
 
 sgd_reg = SGDRegressor(
     max_iter=1000, tol=1e-3, penalty=None, eta0=0.1, random_state=42
@@ -227,7 +172,6 @@ plt.legend(loc="upper left", fontsize=16)
 plt.xlabel(r"$\theta_0$", fontsize=20)
 plt.ylabel(r"$\theta_1$   ", fontsize=20, rotation=0)
 plt.axis([2.5, 4.5, 2.3, 3.9])
-save_fig("gradient_descent_paths_plot")
 plt.show()
 
 
@@ -246,7 +190,6 @@ plt.plot(X, y, "b.")
 plt.xlabel("$x_1$", fontsize=18)
 plt.ylabel("$y$", rotation=0, fontsize=18)
 plt.axis([-3, 3, 0, 10])
-save_fig("quadratic_data_plot")
 plt.show()
 
 
@@ -273,7 +216,6 @@ plt.xlabel("$x_1$", fontsize=18)
 plt.ylabel("$y$", rotation=0, fontsize=18)
 plt.legend(loc="upper left", fontsize=14)
 plt.axis([-3, 3, 0, 10])
-save_fig("quadratic_predictions_plot")
 plt.show()
 
 
@@ -301,7 +243,6 @@ plt.legend(loc="upper left")
 plt.xlabel("$x_1$", fontsize=18)
 plt.ylabel("$y$", rotation=0, fontsize=18)
 plt.axis([-3, 3, 0, 10])
-save_fig("high_degree_polynomials_plot")
 plt.show()
 
 
@@ -335,7 +276,6 @@ def plot_learning_curves(model, X, y):
 lin_reg = LinearRegression()
 plot_learning_curves(lin_reg, X, y)
 plt.axis([0, 80, 0, 3])  # not shown in the book
-save_fig("underfitting_learning_curves_plot")  # not shown
 plt.show()  # not shown
 
 
@@ -351,7 +291,6 @@ polynomial_regression = Pipeline(
 
 plot_learning_curves(polynomial_regression, X, y)
 plt.axis([0, 80, 0, 3])  # not shown
-save_fig("learning_curves_plot")  # not shown
 plt.show()  # not shown
 
 ############################################
@@ -419,7 +358,6 @@ plt.ylabel("$y$", rotation=0, fontsize=18)
 plt.subplot(122)
 plot_model(Ridge, polynomial=True, alphas=(0, 10**-5, 1), random_state=42)
 
-save_fig("ridge_regression_plot")
 plt.show()
 
 
@@ -443,7 +381,6 @@ plt.ylabel("$y$", rotation=0, fontsize=18)
 plt.subplot(122)
 plot_model(Lasso, polynomial=True, alphas=(0, 10**-7, 1), random_state=42)
 
-save_fig("lasso_regression_plot")
 plt.show()
 
 lasso_reg = Lasso(alpha=0.1)
@@ -552,7 +489,6 @@ plt.plot(np.sqrt(train_errors), "r--", linewidth=2, label="Training set")
 plt.legend(loc="upper right", fontsize=14)
 plt.xlabel("Epoch", fontsize=14)
 plt.ylabel("RMSE", fontsize=14)
-save_fig("early_stopping_plot")
 plt.show()
 
 
@@ -649,11 +585,11 @@ for i, N, l1, l2, title in (
     if i == 1:
         ax.set_xlabel(r"$\theta_1$", fontsize=16)
 
-save_fig("lasso_vs_ridge_plot")
 plt.show()
 
 ############################################
 ############################################
+# Classification
 # Logistic Regression
 # Decision Boundaries
 
@@ -670,11 +606,10 @@ plt.plot(
 plt.xlabel("t")
 plt.legend(loc="upper left", fontsize=20)
 plt.axis([-10, 10, -0.1, 1.1])
-save_fig("logistic_function_plot")
 plt.show()
 
 ############################################
-#IRIS
+# IRIS
 
 from sklearn import datasets
 iris = datasets.load_iris()
@@ -723,6 +658,7 @@ plt.text(
     color="k",
     ha="center",
 )
+
 # plt.arrow(decision_boundary, 0.08, -0.3, 0, head_width=0.05, head_length=0.1, fc='b', ec='b')
 # plt.arrow(decision_boundary, 0.92, 0.3, 0, head_width=0.05, head_length=0.1, fc='g', ec='g')
 
@@ -730,7 +666,6 @@ plt.xlabel("Petal width (cm)", fontsize=14)
 plt.ylabel("Probability", fontsize=14)
 plt.legend(loc="center left", fontsize=14)
 plt.axis([0, 3, -0.02, 1.02])
-save_fig("logistic_regression_plot")
 plt.show()
 
 
@@ -777,12 +712,12 @@ plt.text(6.5, 2.3, "Iris virginica", fontsize=14, color="g", ha="center")
 plt.xlabel("Petal length", fontsize=14)
 plt.ylabel("Petal width", fontsize=14)
 plt.axis([2.9, 7, 0.8, 2.7])
-save_fig("logistic_regression_contour_plot")
 plt.show()
 
 
 ############################################
 ############################################
+#
 
 X = iris["data"][:, (2, 3)]  # petal length, petal width
 y = iris["target"]
@@ -792,15 +727,12 @@ softmax_reg = LogisticRegression(
 )
 softmax_reg.fit(X, y)
 
-
-
 x0, x1 = np.meshgrid(
     np.linspace(0, 8, 500).reshape(-1, 1),
     np.linspace(0, 3.5, 200).reshape(-1, 1),
 )
+
 X_new = np.c_[x0.ravel(), x1.ravel()]
-
-
 y_proba = softmax_reg.predict_proba(X_new)
 y_predict = softmax_reg.predict(X_new)
 
@@ -823,14 +755,13 @@ plt.xlabel("Petal length", fontsize=14)
 plt.ylabel("Petal width", fontsize=14)
 plt.legend(loc="center left", fontsize=14)
 plt.axis([0, 7, 0, 3.5])
-save_fig("softmax_regression_contour_plot")
 plt.show()
 
 softmax_reg.predict([[5, 2]])
 
 softmax_reg.predict_proba([[5, 2]])
 
-# # Exercise solutions
+# Exercise solutions
 
 #  For 1 to 11, See appendix A.
 
@@ -1132,7 +1063,7 @@ custom_cmap = ListedColormap(['#fafab0', '#9898ff', '#a0faa0'])
 plt.contourf(x0, x1, zz, cmap=custom_cmap)
 contour = plt.contour(x0, x1, zz1, cmap=plt.cm.brg)
 plt.clabel(contour, inline=1, fontsize=12)
-plt.xlabel("Petal length", fontsize=14)
+lt.xlabel("Petal length", fontsize=14)
 plt.ylabel("Petal width", fontsize=14)
 plt.legend(loc="upper left", fontsize=14)
 plt.axis([0, 7, 0, 3.5])
