@@ -7,7 +7,7 @@ x = np.random.uniform(0, 10, 100)
 noise = np.random.normal(0, 2, 100)
 y = 2 * x + noise
 
-dataset = np.column_stack((x, y))
+dataset = np.c_[x, y]
 
 plt.scatter(x, y, label="Data Points")
 plt.xlabel("Feature (x)")

@@ -86,7 +86,7 @@ class CustomLinearRegressor:
             self.learning_path.append(theta)
             cost_history[i] = self.compute_cost(
                 X, y, theta
-            )  # Updated cost history per iteration
+            )  # updated cost history per iteration
 
         return theta
 
@@ -517,3 +517,45 @@ class ElasticNetRegressor:
         )
         plt.legend()
         plt.show()
+
+
+from sklearn import datasets
+
+X, y = datasets.make_regression(
+    n_samples=1000, n_features=2, noise=10, random_state=42
+)
+
+cus_reg = CustomLinearRegressor(
+    learning_rate=0.001, num_iterations=1000, method='least_squares'
+)
+
+cus_reg.train(X, y)
+
+# def poincare_pseudo_inverse(A, tol=1e-6):
+#     """
+#     Compute the Poincaré pseudo-inverse of matrix A.
+
+#     Parameters:
+#         A (numpy.ndarray): The input matrix.
+#         tol (float): Tolerance for singular values considered as zero.
+
+#     Returns:
+#         numpy.ndarray: The Poincaré pseudo-inverse of A.
+#     """
+#     U, S, Vt = np.linalg.svd(A, full_matrices=False)
+
+#     # Compute reciprocal of nonzero singular values
+#     S_inv = np.array([1/s if s > tol else 0 for s in S])
+
+#     # Construct the pseudo-inverse
+#     A_pseudo = Vt.T @ np.diag(S_inv) @ U.T
+#     return A_pseudo
+
+# # Example usage
+# A = np.array([[1, 2], [2, 4]])  # Singular matrix
+# A_pseudo = poincare_pseudo_inverse(A)
+
+# print("Original Matrix A:")
+# print(A)
+# print("\nPoincaré Pseudo-Inverse of A:")
+# print(A_pseudo)
