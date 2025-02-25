@@ -9,7 +9,7 @@
 - [[#model-training][Model Training]]
 - [[#assumptions-of-linear-regression][Assumptions of Linear Regression]]
 - [[#evaluating-the-model][Evaluating the Model]]
-- [[#training-a-linear-regressior][Training a Linear Regressior]]
+- [[#training-a-linear-regressor][Training a Linear Regressor]]
   -  [[#normal-equations-least-square-method][Normal Equations (Least Square Method)]]
   -  [[#pm-inverse][PM Inverse]]
   -  [[#batch-gradient-descent-method][Batch Gradient Descent Method]]
@@ -37,16 +37,23 @@ y = f(x) =  a_0 + a_1 x_1 + a_2 x_2 + \cdots + a_d x_d
 #+END_SRC   
 
 where:
-- \( a_0 \) is the bias (intercept),
-- \( x_1, x_2, ..., x_d \) are the \( d \) input features,
-- \( a_1, a_2, ..., a_d \) are the corresponding coefficients that determine the contribution of each feature to the output.
+-  a_0  is the bias (intercept),
+-  x_1, x_2, ..., x_d  are the  d  input features,
+-  a_1, a_2, ..., a_d  are the corresponding coefficients that determine the contribution of each feature to the output.
+
+We can also introduce a variable x_0 to have a value of 1 for each sampe and this will us to write the multiple linear regression in Matrix notation as:
+
+#+BEGIN_SRC  latex
+  y = \mathbb{X} \mathbb{a} 
+#+END_SRC  
+where X is matrix of size N \times D, containing all the features and theta is is colum vector of size D \times 1.
 
 * Model Training
 
 The objective of training a linear regression model is to find the optimal values of the parameters \( a_0, a_1, ..., a_d \) that minimize the error. This is commonly achieved using the **Ordinary Least Squares (OLS)** method, which minimizes the sum of squared residuals:
 
 #+BEGIN_SRC latex
-J(a) = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+J(a) = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2 = ||y - \hat{y}||^2 
 #+END_SRC  
 
 where:
@@ -76,14 +83,10 @@ To assess the performance of a linear regression model, we use metrics such as:
   #+END_SRC  
   where \( SS_{res} \) is the sum of squared residuals and \( SS_{tot} \) is the total sum of squares.
 
-
-
-* Training a Linear Regressior
-
+* Training a Linear Regressor
+Training a linear regressor means finding the vales of parameters/coefficients \theta_i using the traing data such that. 
 **  Normal Equations (Least Square Method)
-
 **  PM Inverse
-
 **  Batch Gradient Descent Method 
 
 **  Mini Batch Gradient Descent Method 
