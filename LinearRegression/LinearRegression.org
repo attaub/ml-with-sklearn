@@ -1,0 +1,95 @@
+#+TITLE: Linear Regression
+#+STARTUP: overview
+#+OPTIONS: toc:2
+
+* Table of contents :toc:
+- [[#introduction][Introduction]]
+- [[#simple-linear-regression][Simple Linear Regression]]
+- [[#multiple-linear-regression][Multiple Linear Regression]]
+- [[#model-training][Model Training]]
+- [[#assumptions-of-linear-regression][Assumptions of Linear Regression]]
+- [[#evaluating-the-model][Evaluating the Model]]
+- [[#conclusion][Conclusion]]
+- [[#training-a-linear-regressior][Training a Linear Regressior]]
+  -  [[#normal-equations-least-square-method][Normal Equations (Least Square Method)]]
+  -  [[#pm-inverse][PM Inverse]]
+  -  [[#batch-gradient-descent-method][Batch Gradient Descent Method]]
+  -  [[#mini-batch-gradient-descent-method][Mini Batch Gradient Descent Method]]
+  -  [[#stochastic-gradient-descent-method][Stochastic Gradient Descent Method]]
+
+* Introduction
+
+Linear regression is one of the simplest and most widely used techniques in statistical modeling and machine learning. It models the relationship between a dependent variable \( y \) and one or more independent variables \( x \) using a linear equation.
+
+* Simple Linear Regression
+
+#+BEGIN_SRC latex
+y = f(x) = a x + b
+#+END_SRC  
+
+where \( x \) is the only feature, and \( y \) is the target. \( b \) is the bias (intercept), and \( a \) is the slope of the regression line. The goal is to find the best-fitting line that minimizes the error between the predicted values and the actual values.
+
+* Multiple Linear Regression
+
+In multiple linear regression, we extend the concept of simple linear regression to multiple features. The equation is given by:
+
+#+BEGIN_SRC latex
+y = f(x) =  a_0 + a_1 x_1 + a_2 x_2 + \cdots + a_d x_d
+#+END_SRC   
+
+where:
+- \( a_0 \) is the bias (intercept),
+- \( x_1, x_2, ..., x_d \) are the \( d \) input features,
+- \( a_1, a_2, ..., a_d \) are the corresponding coefficients that determine the contribution of each feature to the output.
+
+* Model Training
+
+The objective of training a linear regression model is to find the optimal values of the parameters \( a_0, a_1, ..., a_d \) that minimize the error. This is commonly achieved using the **Ordinary Least Squares (OLS)** method, which minimizes the sum of squared residuals:
+
+#+BEGIN_SRC latex
+J(a) = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+#+END_SRC  
+
+where:
+- \( y_i \) is the actual value,
+- \( \hat{y}_i \) is the predicted value.
+
+* Assumptions of Linear Regression
+
+1. **Linearity**: The relationship between the independent and dependent variables is linear.
+2. **Independence**: The observations are independent of each other.
+3. **Homoscedasticity**: The variance of residuals is constant across all levels of the independent variables.
+4. **Normality**: The residuals follow a normal distribution.
+5. **No Multicollinearity**: Independent variables should not be highly correlated with each other.
+
+* Evaluating the Model
+
+To assess the performance of a linear regression model, we use metrics such as:
+
+- **Mean Squared Error (MSE)**:
+  #+BEGIN_SRC latex
+  MSE = \frac{1}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+  #+END_SRC  
+
+- **R-squared (\( R^2 \))**: Measures the proportion of variance in \( y \) explained by the model:
+  #+BEGIN_SRC latex
+  R^2 = 1 - \frac{SS_{res}}{SS_{tot}}
+  #+END_SRC  
+  where \( SS_{res} \) is the sum of squared residuals and \( SS_{tot} \) is the total sum of squares.
+
+* Conclusion
+
+Linear regression is a fundamental technique in statistics and machine learning that helps in understanding relationships between variables and making predictions. It serves as the foundation for more complex regression models.
+
+
+* Training a Linear Regressior
+
+**  Normal Equations (Least Square Method)
+
+**  PM Inverse
+
+**  Batch Gradient Descent Method 
+
+**  Mini Batch Gradient Descent Method 
+
+**  Stochastic Gradient Descent Method 
