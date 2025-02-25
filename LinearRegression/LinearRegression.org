@@ -9,7 +9,6 @@
 - [[#model-training][Model Training]]
 - [[#assumptions-of-linear-regression][Assumptions of Linear Regression]]
 - [[#evaluating-the-model][Evaluating the Model]]
-- [[#conclusion][Conclusion]]
 - [[#training-a-linear-regressior][Training a Linear Regressior]]
   -  [[#normal-equations-least-square-method][Normal Equations (Least Square Method)]]
   -  [[#pm-inverse][PM Inverse]]
@@ -77,9 +76,6 @@ To assess the performance of a linear regression model, we use metrics such as:
   #+END_SRC  
   where \( SS_{res} \) is the sum of squared residuals and \( SS_{tot} \) is the total sum of squares.
 
-* Conclusion
-
-Linear regression is a fundamental technique in statistics and machine learning that helps in understanding relationships between variables and making predictions. It serves as the foundation for more complex regression models.
 
 
 * Training a Linear Regressior
