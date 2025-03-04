@@ -1,0 +1,198 @@
+\documentclass{article}
+\usepackage{amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\title{Decision Trees}
+\author{Atta}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+\begin{itemize}
+\item Versatile machine learning models used for both classification and regression tasks.
+\item  Intuitive, easy to interpret.
+\item  Can handle both numerical and categorical data. 
+\end{itemize}
+
+
+\section*{Structure of a Decision Tree}
+A decision tree is a hierarchical model that makes decisions based on a series of questions. It consists of the following elements:
+\begin{itemize}
+    \item \textbf{Root Node}: Represents the entire dataset.
+    \item \textbf{Internal Nodes}: Test a particular attribute and split the data.
+    \item \textbf{Branches}: Outcomes of tests, connecting nodes.
+    \item \textbf{Leaf Nodes}: Terminal nodes providing the final decision or prediction.
+\end{itemize}
+
+\section*{Growing a Decision Tree}
+The process of growing a decision tree involves recursively splitting the data based on the most informative features. The key steps are:
+\begin{itemize}
+    \item \textbf{Step 1:} Select the best attribute to split the data.
+    \item \textbf{Step 2:} Split the data into subsets.
+    \item \textbf{Step 3:} Recursively repeat Steps 1 and 2 on each subset until stopping criteria are met.
+\end{itemize}
+
+\section*{Splitting Criteria}
+The choice of splitting criteria depends on the type of task. 
+\subsection*{For Classification Tasks}
+\begin{itemize}
+    \item \textbf{Gini Impurity:} Measures the probability of incorrect classification.
+    \item \textbf{Entropy:} Measures the amount of information or uncertainty.
+\end{itemize}
+\subsection*{For Regression Tasks}
+\begin{itemize}
+    \item \textbf{Mean Squared Error (MSE):} Measures the average squared difference between predicted and actual values.
+\end{itemize}
+
+\section*{Advantages and Disadvantages}
+\subsection*{Advantages}
+\begin{itemize}
+    \item Easy to understand and interpret.
+    \item Can handle both numerical and categorical data.
+    \item Requires minimal data preparation.
+    \item Can model non-linear relationships.
+\end{itemize}
+
+\subsection*{Disadvantages}
+\begin{itemize}
+    \item May result in overly complex trees that do not generalize well (overfitting).
+    \item Can be unstable with small variations in the data.
+    \item Biased towards attributes with more levels in classification tasks.
+\end{itemize}
+
+\section*{Mathematical Formulations}
+\subsection*{Gini Index}
+The Gini index measures the impurity of a node:
+\begin{align*}
+\text{Gini}(t) &= 1 - \sum_{i=1}^{c} p(i|t)^2 \\
+\Delta\text{Gini}(s,t) &= \text{Gini}(t) - p_L \cdot \text{Gini}(t_L) - p_R \cdot \text{Gini}(t_R)
+\end{align*}
+Where:
+\begin{itemize}
+    \item $t$ is the current node.
+    \item $c$ is the number of classes.
+    \item $p(i|t)$ is the proportion of samples belonging to class $i$ at node $t$.
+    \item $s$ is a potential split.
+    \item $t_L$ and $t_R$ are the left and right child nodes after the split.
+    \item $p_L$ and $p_R$ are the proportions of samples going to the left and right nodes.
+\end{itemize}
+
+\subsection*{Mean Squared Error (MSE)}
+The MSE measures the error for regression tasks:
+\begin{align*}
+\text{MSE}(t) &= \frac{1}{N_t} \sum_{i \in D_t} (y_i - \bar{y}_t)^2 \\
+\Delta\text{MSE}(s,t) &= \text{MSE}(t) - \frac{N_{t_L}}{N_t} \cdot \text{MSE}(t_L) - \frac{N_{t_R}}{N_t} \cdot \text{MSE}(t_R)
+\end{align*}
+Where:
+\begin{itemize}
+    \item $t$ is the current node.
+    \item $N_t$ is the number of samples at node $t$.
+    \item $D_t$ is the set of samples at node $t$.
+    \item $y_i$ is the target value of sample $i$.
+    \item $\bar{y}_t$ is the mean target value at node $t$.
+    \item $s$ is a potential split.
+    \item $t_L$ and $t_R$ are the left and right child nodes after the split.
+    \item $N_{t_L}$ and $N_{t_R}$ are the number of samples in the left and right nodes.
+\end{itemize}
+
+\subsection*{CART Objective}
+The CART algorithm aims to find the best split $s^*$:
+\[
+% s^* = \argmax_s \Delta I(s,t)
+\]
+Where $\Delta I(s,t)$ is the improvement in the splitting criterion (e.g., Gini or MSE).
+
+\section*{CART Algorithm}
+The Classification and Regression Trees (CART) algorithm is a popular method for constructing decision trees. Below is the pseudocode for the CART algorithm:
+
+\begin{algorithm}
+\caption{CART Algorithm}
+\label{cart_algorithm}
+\begin{algorithmic}[1]
+\State \textbf{Input:} Dataset $D$, Features $F$, Target variable $y$
+\State \textbf{Output:} Decision Tree $T$
+
+\Procedure{BuildTree}{$D$, $F$, $y$}
+    \If{Stopping condition met}
+        \State Create a leaf node with the predicted value
+        \State \Return leaf node
+    \EndIf
+
+    \State Find the best split $(f^*, t^*)$ where $f^* \in F$ and $t^*$ is the threshold
+    \State Split the dataset $D$ into $D_{\text{left}}$ and $D_{\text{right}}$ based on $(f^*, t^*)$
+    \State Create a decision node with the split $(f^*, t^*)$
+    \State $T_{\text{left}} \gets \Call{BuildTree}{D_{\text{left}}, F, y}$
+    \State $T_{\text{right}} \gets \Call{BuildTree}{D_{\text{right}}, F, y}$
+    \State \Return decision node with $T_{\text{left}}$ and $T_{\text{right}}$ as children
+\EndProcedure
+
+\State \textbf{Initialize:} $T \gets \Call{BuildTree}{D, F, y}$
+\State \textbf{Return:} $T$
+\end{algorithmic}
+\end{algorithm}
+
+\section*{Computational Complexity}
+The computational complexity of decision trees can be expressed as:
+\[
+O(m \cdot n \log n)
+\]
+Where:
+\begin{itemize}
+    \item $m$ is the number of features.
+    \item $n$ is the number of examples in the training set.
+\end{itemize}
+This complexity arises from:
+\begin{itemize}
+    \item Sorting the features: $O(m \cdot n \log n)$.
+    \item Finding the best split at each node: $O(n \cdot m)$.
+\end{itemize}
+In the worst case, when the tree becomes unbalanced, the complexity can increase to:
+\[
+O(m \cdot n^2)
+\]
+
+\section*{Gini vs. Entropy}
+Both Gini index and entropy are valid impurity measures for classification tasks in decision trees, but they have some differences:
+\begin{itemize}
+    \item \textbf{Computational Efficiency:} Gini index is faster to compute than entropy, as it does not involve logarithms.
+    \item \textbf{Sensitivity to Class Imbalance:} Entropy is more sensitive to class imbalance and may perform better for skewed datasets.
+    \item \textbf{Tree Structure:} Gini tends to isolate the most frequent class, while entropy produces more balanced trees.
+    \item \textbf{Performance:} The choice between Gini and entropy often has little impact on overall performance.
+    \item \textbf{Use Cases:} Gini is preferred for binary classification, while entropy is suitable for multi-class problems.
+\end{itemize}
+
+\subsection*{Regularization Hyperparameters}
+Decision Trees make very few assumptions about the training data, and when left unconstrained, the tree structure will adapt itself to the data, potentially overfitting it. This is often called a nonparametric model. To avoid overfitting, we use regularization techniques, which constrain the tree's freedom during training. Regularization can be controlled by several hyperparameters, which are specific to the algorithm used. Here are some key regularization hyperparameters in Decision Trees:
+
+\begin{itemize}
+    \item \textbf{max\_depth}: Restricts the maximum depth of the tree. The default value is None, meaning no restriction. Reducing max\_depth helps prevent overfitting.
+    \item \textbf{min\_samples\_split}: Specifies the minimum number of samples a node must have before it can be split. Increasing this value helps regularize the model.
+    \item \textbf{min\_samples\_leaf}: Specifies the minimum number of samples that a leaf node must have. This can help avoid overfitting, especially in deep trees.
+    \item \textbf{min\_weight\_fraction\_leaf}: Similar to min\_samples\_leaf, but expressed as a fraction of the total number of weighted instances.
+    \item \textbf{max\_leaf\_nodes}: Restricts the maximum number of leaf nodes in the tree. Reducing this can regularize the model by limiting the tree's complexity.
+    \item \textbf{max\_features}: Specifies the maximum number of features evaluated for splitting at each node. Reducing this value can also help to regularize the model.
+\end{itemize}
+Increasing min\_* hyperparameters or reducing max\_* hyperparameters can help prevent overfitting and improve generalization.
+
+
+\subsection*{Instability}
+Decision Trees some limitations:
+
+\begin{itemize}
+  \item \textbf{Sensitivity}: Orthogonal decision boundaries are  making them sensitive to the rotation of the training set.
+
+When the data is rotated, the decision boundary can become unnecessarily complex, potentially affecting generalization.
+    \item \textbf{Instability to Small Variations in Data}: Decision Trees can be very sensitive to small changes in the training data. For example, removing a single data point can lead to a significantly different tree structure.
+    \item \textbf{Stochastic Nature}: Since the training algorithm used by Scikit-Learn is stochastic, even the same training data can produce different models unless the \texttt{random\_state} hyperparameter is set to a fixed value.
+\item \textbf{Random Forests} help mitigate this instability by averaging predictions over multiple trees, improving stability and generalization.
+
+\end{itemize}
+
+\end{document}
