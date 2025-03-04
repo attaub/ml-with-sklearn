@@ -76,11 +76,6 @@ S = 1000  # Number of synthetic datasets
 estimates = simulate_sampling_distribution(theta_star, N, S)
 plot_sampling_distribution(estimates, theta_star, N)
 
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-
 # Generate a synthetic dataset
 np.random.seed(42)
 N = 100  # Sample size
@@ -99,16 +94,12 @@ def parametric_bootstrap(data, S=1000):
     - data: Observed dataset.
     - S: Number of bootstrap samples.
     """
-    # Step 1: Estimate parameters from the observed data
     mu_hat = np.mean(data)  # Estimate mean
     sigma_hat = np.std(data)  # Estimate standard deviation
-
-    # Step 2: Generate synthetic datasets and compute the estimator
+    
     bootstrap_estimates = []
     for _ in range(S):
-        # Generate synthetic dataset from the estimated model
         synthetic_data = np.random.normal(loc=mu_hat, scale=sigma_hat, size=N)
-        # Compute the estimator for the synthetic dataset
         theta_hat = estimator(synthetic_data)
         bootstrap_estimates.append(theta_hat)
     return np.array(bootstrap_estimates)
@@ -122,89 +113,7 @@ def non_parametric_bootstrap(data, S=1000):
     """
     bootstrap_estimates = []
     for _ in range(S):
-        # Generate synthetic dataset by resampling with replacement
         synthetic_data = np.random.choice(data, size=N, replace=True)
-        # Compute the estimator for the synthetic dataset
-        theta_hat = estimator(synthetic_data)
-        bootstrap_estimates.append(theta_hat)
-    return np.array(bootstrap_estimates)
-
-# Plot the bootstrap sampling distribution
-def plot_bootstrap_distribution(bootstrap_estimates, method):
-    """
-    Plot the bootstrap sampling distribution of the estimator.
-    - bootstrap_estimates: Array of bootstrap estimates.
-    - method: String indicating the bootstrap method ("Parametric" or "Non-Parametric").
-    """
-    plt.hist(bootstrap_estimates, bins=50, density=True, alpha=0.6, color='blue', label='Bootstrap Distribution')
-    plt.axvline(np.mean(bootstrap_estimates), color='red', linestyle='dashed', linewidth=2, label='Mean of Bootstrap Estimates')
-    plt.xlabel('Estimator Value')
-    plt.ylabel('Density')
-    plt.title(f'{method} Bootstrap Sampling Distribution of the Median')
-    plt.legend()
-    plt.show()
-
-# Parameters
-S = 1000  # Number of bootstrap samples
-
-# Run parametric bootstrap
-parametric_estimates = parametric_bootstrap(data, S)
-plot_bootstrap_distribution(parametric_estimates, "Parametric")
-
-# Run non-parametric bootstrap
-non_parametric_estimates = non_parametric_bootstrap(data, S)
-plot_bootstrap_distribution(non_parametric_estimates, "Non-Parametric")
-
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import norm
-
-# Generate a synthetic dataset
-np.random.seed(42)
-N = 100  # Sample size
-true_mean = 5.0  # True mean of the normal distribution
-true_std = 2.0  # True standard deviation of the normal distribution
-data = np.random.normal(loc=true_mean, scale=true_std, size=N)  # Observed data
-
-# Define the estimator (e.g., sample median)
-def estimator(data):
-    return np.median(data)
-
-# Parametric Bootstrap
-def parametric_bootstrap(data, S=1000):
-    """
-    Perform parametric bootstrap to estimate the sampling distribution of the estimator.
-    - data: Observed dataset.
-    - S: Number of bootstrap samples.
-    """
-    # Step 1: Estimate parameters from the observed data
-    mu_hat = np.mean(data)  # Estimate mean
-    sigma_hat = np.std(data)  # Estimate standard deviation
-
-    # Step 2: Generate synthetic datasets and compute the estimator
-    bootstrap_estimates = []
-    for _ in range(S):
-        # Generate synthetic dataset from the estimated model
-        synthetic_data = np.random.normal(loc=mu_hat, scale=sigma_hat, size=N)
-        # Compute the estimator for the synthetic dataset
-        theta_hat = estimator(synthetic_data)
-        bootstrap_estimates.append(theta_hat)
-    return np.array(bootstrap_estimates)
-
-# Non-Parametric Bootstrap
-def non_parametric_bootstrap(data, S=1000):
-    """
-    Perform non-parametric bootstrap to estimate the sampling distribution of the estimator.
-    - data: Observed dataset.
-    - S: Number of bootstrap samples.
-    """
-    bootstrap_estimates = []
-    for _ in range(S):
-        # Generate synthetic dataset by resampling with replacement
-        synthetic_data = np.random.choice(data, size=N, replace=True)
-        # Compute the estimator for the synthetic dataset
         theta_hat = estimator(synthetic_data)
         bootstrap_estimates.append(theta_hat)
     return np.array(bootstrap_estimates)
@@ -228,10 +137,8 @@ def plot_bootstrap_distribution(bootstrap_estimates, method, alpha=0.05):
     - method: String indicating the bootstrap method ("Parametric" or "Non-Parametric").
     - alpha: Significance level (default: 0.05 for 95% CI).
     """
-    # Compute confidence interval
     lower, upper = compute_confidence_interval(bootstrap_estimates, alpha)
-
-    # Plot histogram of bootstrap estimates
+    
     plt.hist(bootstrap_estimates, bins=50, density=True, alpha=0.6, color='blue', label='Bootstrap Distribution')
     plt.axvline(np.mean(bootstrap_estimates), color='red', linestyle='dashed', linewidth=2, label='Mean of Bootstrap Estimates')
     plt.axvline(lower, color='green', linestyle='dashed', linewidth=2, label=f'{100*(1-alpha)}% CI Lower Bound')
@@ -242,7 +149,7 @@ def plot_bootstrap_distribution(bootstrap_estimates, method, alpha=0.05):
     plt.legend()
     plt.show()
 
-# Parameters
+# Parameters and execution
 S = 1000  # Number of bootstrap samples
 alpha = 0.05  # Significance level for 95% CI
 
@@ -260,3 +167,110 @@ non_parametric_ci = compute_confidence_interval(non_parametric_estimates, alpha)
 
 print(f"Parametric Bootstrap 95% CI: {parametric_ci}")
 print(f"Non-Parametric Bootstrap 95% CI: {non_parametric_ci}")
+
+class BootstrapAnalysis:
+    def __init__(self, N=100, S=1000, alpha=0.05):
+        """
+        Initialize the bootstrap analysis.
+        
+        Parameters:
+        - N: Sample size for each dataset
+        - S: Number of bootstrap samples
+        - alpha: Significance level for confidence intervals
+        """
+        self.N = N
+        self.S = S
+        self.alpha = alpha
+        self.data = None
+        
+    def generate_data(self, true_mean=5.0, true_std=2.0, seed=42):
+        """Generate synthetic dataset"""
+        np.random.seed(seed)
+        self.data = np.random.normal(loc=true_mean, scale=true_std, size=self.N)
+        return self.data
+
+    @staticmethod
+    def estimator(data):
+        """Default estimator using median"""
+        return np.median(data)
+    
+    def parametric_bootstrap(self):
+        """Perform parametric bootstrap"""
+        if self.data is None:
+            raise ValueError("Data not generated. Call generate_data() first.")
+            
+        mu_hat = np.mean(self.data)
+        sigma_hat = np.std(self.data)
+        
+        bootstrap_estimates = []
+        for _ in range(self.S):
+            synthetic_data = np.random.normal(loc=mu_hat, scale=sigma_hat, size=self.N)
+            theta_hat = self.estimator(synthetic_data)
+            bootstrap_estimates.append(theta_hat)
+        return np.array(bootstrap_estimates)
+
+    def non_parametric_bootstrap(self):
+        """Perform non-parametric bootstrap"""
+        if self.data is None:
+            raise ValueError("Data not generated. Call generate_data() first.")
+            
+        bootstrap_estimates = []
+        for _ in range(self.S):
+            synthetic_data = np.random.choice(self.data, size=self.N, replace=True)
+            theta_hat = self.estimator(synthetic_data)
+            bootstrap_estimates.append(theta_hat)
+        return np.array(bootstrap_estimates)
+
+    def compute_confidence_interval(self, bootstrap_estimates):
+        """Compute confidence interval from bootstrap estimates"""
+        lower = np.percentile(bootstrap_estimates, 100 * self.alpha / 2)
+        upper = np.percentile(bootstrap_estimates, 100 * (1 - self.alpha / 2))
+        return lower, upper
+
+    def plot_bootstrap_distribution(self, bootstrap_estimates, method):
+        """Plot bootstrap distribution with confidence intervals"""
+        lower, upper = self.compute_confidence_interval(bootstrap_estimates)
+        
+        plt.figure(figsize=(10, 6))
+        plt.hist(bootstrap_estimates, bins=50, density=True, alpha=0.6, 
+                color='blue', label='Bootstrap Distribution')
+        plt.axvline(np.mean(bootstrap_estimates), color='red', linestyle='dashed',
+                   linewidth=2, label='Mean of Bootstrap Estimates')
+        plt.axvline(lower, color='green', linestyle='dashed',
+                   linewidth=2, label=f'{100*(1-self.alpha)}% CI Lower Bound')
+        plt.axvline(upper, color='green', linestyle='dashed',
+                   linewidth=2, label=f'{100*(1-self.alpha)}% CI Upper Bound')
+        plt.xlabel('Estimator Value')
+        plt.ylabel('Density')
+        plt.title(f'{method} Bootstrap Sampling Distribution of the Median')
+        plt.legend()
+        plt.show()
+
+    def run_analysis(self):
+        """Run complete bootstrap analysis"""
+        if self.data is None:
+            self.generate_data()
+
+        # Run parametric bootstrap
+        parametric_estimates = self.parametric_bootstrap()
+        self.plot_bootstrap_distribution(parametric_estimates, "Parametric")
+        parametric_ci = self.compute_confidence_interval(parametric_estimates)
+
+        # Run non-parametric bootstrap
+        non_parametric_estimates = self.non_parametric_bootstrap()
+        self.plot_bootstrap_distribution(non_parametric_estimates, "Non-Parametric")
+        non_parametric_ci = self.compute_confidence_interval(non_parametric_estimates)
+
+        # Print results
+        print(f"Parametric Bootstrap {100*(1-self.alpha)}% CI: {parametric_ci}")
+        print(f"Non-Parametric Bootstrap {100*(1-self.alpha)}% CI: {non_parametric_ci}")
+
+
+# Example usage:
+if __name__ == "__main__":
+    # Create instance with default parameters
+    bootstrap = BootstrapAnalysis(N=100, S=1000, alpha=0.05)
+    
+    # Generate data and run analysis
+    bootstrap.generate_data(true_mean=5.0, true_std=2.0)
+    bootstrap.run_analysis()

@@ -1,0 +1,71 @@
+#+TITLE: 
+#+AUTHOR: ATTA
+#+STARTUP: overview
+#+OPTIONS: toc:2
+
+* Table of contents :toc:
+- [[#bias-variance-tradeoff-overview][Bias-Variance Tradeoff Overview]]
+- [[#role-in-sampling-distribution][Role in Sampling Distribution]]
+- [[#role-in-bootstrap][Role in Bootstrap]]
+- [[#role-in-confidence-intervals][Role in Confidence Intervals]]
+- [[#practical-implications][Practical Implications]]
+- [[#example][Example]]
+
+* Bias-Variance Tradeoff Overview
+  - *Bias:* Difference between the expected value of an estimator and the true parameter value.
+    - High bias → Systematic deviation from the true value.
+  - *Variance:* Variability of the estimator across different datasets.
+    - High variance → Sensitive to small changes in data.
+  - *Tradeoff:* Reducing bias increases variance and vice versa.
+  - *Goal:* Balance both to minimize Mean Squared Error (MSE).
+    #+BEGIN_EXPORT latex
+    MSE = Bias^2 + Variance
+    #+END_EXPORT
+
+* Role in Sampling Distribution
+  - *Sampling distribution:* Describes how an estimator varies across different datasets.
+  - *Bias:* Determines if the distribution is centered around the true parameter \( \theta^* \).
+  - *Variance:* Determines the spread of the sampling distribution.
+  - *A good estimator has:*
+    - Low bias → Sampling distribution centered around \( \theta^* \).
+    - Low variance → Distribution is tightly concentrated.
+
+* Role in Bootstrap
+  - *Bootstrap:* Approximates the sampling distribution by resampling data.
+  - *Bias Estimation:*
+    #+BEGIN_EXPORT latex
+    Bias = E[\hat{\theta}^*] - \hat{\theta}
+    #+END_EXPORT
+    - \( \hat{\theta}^* \): Bootstrap estimates.
+    - \( \hat{\theta} \): Estimate from original data.
+    - If biased, the bootstrap distribution is not centered around \( \theta^* \).
+  - *Variance Estimation:*
+    #+BEGIN_EXPORT latex
+    Variance = Var(\hat{\theta}^*)
+    #+END_EXPORT
+    - High variance in the bootstrap distribution → Estimator is sensitive to the dataset.
+
+* Role in Confidence Intervals
+  - *Bias:*
+    - A biased estimator → Confidence interval not centered around \( \theta^* \).
+    - Example: If an estimator underestimates \( \theta^* \), its confidence interval is shifted downward.
+  - *Variance:*
+    - A high-variance estimator → Wider confidence intervals (greater uncertainty).
+  - *Bias-Variance Tradeoff in Confidence Intervals:*
+    - Low-bias, high-variance → Wide confidence intervals (proper coverage but high uncertainty).
+    - High-bias, low-variance → Narrow confidence intervals (less coverage reliability).
+
+* Practical Implications
+  - *Bootstrap for Bias Correction:*
+    - Bias-corrected and accelerated (BCa) bootstrap adjusts for bias and skewness.
+  - *Confidence Interval Width:*
+    - Bias-variance tradeoff affects both accuracy (low bias) and precision (low variance).
+  - *Model Selection in Machine Learning:*
+    - High-bias models (e.g., linear regression) may underestimate confidence intervals.
+    - High-variance models (e.g., deep networks) may produce overly wide intervals.
+
+* Example
+  - *Estimating the Mean of a Normal Distribution:*
+    - *Sample Mean:*
+      - Unbiased estimator.
+      - Low variance (for large sample size)
